@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addMinutes } from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useCalendar, MaintenanceTask } from "@/context/CalendarContext";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,10 @@ const locales = {
   'en-US': enUS,
 };
 
+// Fixed localizer implementation
 const localizer = {
-  format: (date: Date, format: string) => format(date, format),
-  parse: (str: string, format: string) => parse(str, format, new Date()),
+  format: (date: Date, formatStr: string) => format(date, formatStr),
+  parse: (str: string, formatStr: string) => parse(str, formatStr, new Date()),
   startOfWeek: (date: Date) => startOfWeek(date),
   getDay: (date: Date) => getDay(date),
   locales: locales,
