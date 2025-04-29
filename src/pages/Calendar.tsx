@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useMemo } from "react";
-import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
+import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useCalendar, MaintenanceTask } from "@/context/CalendarContext";
@@ -13,19 +13,19 @@ import { motion } from "framer-motion";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-// Create a custom localizer without moment dependency
+// Use the built-in dateFnsLocalizer instead of custom implementation
 const locales = {
   'en-US': enUS,
 };
 
-// Fixed localizer implementation
-const localizer = {
-  format: (date: Date, formatStr: string) => format(date, formatStr),
-  parse: (str: string, formatStr: string) => parse(str, formatStr, new Date()),
-  startOfWeek: (date: Date) => startOfWeek(date),
-  getDay: (date: Date) => getDay(date),
-  locales: locales,
-};
+// Use the provided dateFnsLocalizer from react-big-calendar
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 const Calendar = () => {
   const { events, setEvents, isDateOverloaded } = useCalendar();
@@ -93,7 +93,7 @@ const Calendar = () => {
 
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 h-[80vh]">
         <BigCalendar
-          localizer={localizer as any}
+          localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
