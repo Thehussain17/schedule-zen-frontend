@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
+import { Spinner } from "@/components/ui/spinner";
 
 const TechnicianCard = ({ technician }: { technician: Technician }) => {
   return (
@@ -51,39 +52,13 @@ const TechnicianCard = ({ technician }: { technician: Technician }) => {
 };
 
 const Technicians = () => {
-  const { technicians, setTechnicians } = useCalendar();
+  const { technicians, setTechnicians, loading } = useCalendar();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newTechnician, setNewTechnician] = useState<Omit<Technician, "id">>({
     name: "",
     specialty: "",
     availability: true,
   });
-
-  // Mock data for initial render
-  useEffect(() => {
-    if (technicians.length === 0) {
-      setTechnicians([
-        {
-          id: "1",
-          name: "John Smith",
-          specialty: "HVAC",
-          availability: true,
-        },
-        {
-          id: "2",
-          name: "Sarah Johnson",
-          specialty: "Electrical",
-          availability: true,
-        },
-        {
-          id: "3",
-          name: "Mike Wilson",
-          specialty: "Plumbing",
-          availability: false,
-        },
-      ]);
-    }
-  }, [technicians.length, setTechnicians]);
 
   const handleAddTechnician = () => {
     if (newTechnician.name && newTechnician.specialty) {
@@ -119,6 +94,17 @@ const Technicians = () => {
       transition: { type: "spring", stiffness: 100 }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <Spinner className="w-12 h-12 mx-auto mb-4" />
+          <p className="text-lg">Loading technicians...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

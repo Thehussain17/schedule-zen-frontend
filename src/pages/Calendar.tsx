@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import EventDialog from "@/components/calendar/EventDialog";
 import DayCell from "@/components/calendar/DayCell";
 import EventItem from "@/components/calendar/EventItem";
-import { generateMockTasks } from "@/lib/calendar-utils";
 import { motion } from "framer-motion";
+import { Spinner } from "@/components/ui/spinner";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -28,17 +28,9 @@ const localizer = dateFnsLocalizer({
 });
 
 const Calendar = () => {
-  const { events, setEvents, isDateOverloaded } = useCalendar();
+  const { events, setEvents, isDateOverloaded, loading } = useCalendar();
   const [selectedEvent, setSelectedEvent] = useState<MaintenanceTask | null>(null);
   const [showEventDialog, setShowEventDialog] = useState(false);
-
-  // Load mock data if no events exist
-  useMemo(() => {
-    if (events.length === 0) {
-      const mockTasks = generateMockTasks();
-      setEvents(mockTasks);
-    }
-  }, [events.length, setEvents]);
 
   const handleSelectEvent = useCallback((event: MaintenanceTask) => {
     setSelectedEvent(event);
@@ -78,6 +70,17 @@ const Calendar = () => {
       </DayCell>
     ),
   };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <Spinner className="w-12 h-12 mx-auto mb-4" />
+          <p className="text-lg">Loading maintenance schedule...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 

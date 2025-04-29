@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { getTechnicians, getMaintenanceSchedule, convertScheduleToEvents } from "@/services/supabaseService";
 
 export interface Technician {
   id: string;
@@ -30,6 +31,7 @@ interface CalendarContextType {
   deleteEvent: (eventId: string) => void;
   assignTechnician: (eventId: string, technicianId: string) => void;
   isDateOverloaded: (date: Date) => boolean;
+  loading: boolean;
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
@@ -41,6 +43,41 @@ interface CalendarProviderProps {
 export const CalendarProvider = ({ children }: CalendarProviderProps) => {
   const [events, setEvents] = useState<MaintenanceTask[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Load data from Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Get technicians data
+        const techData = await getTechnicians();
+        const formattedTechs = techData.map((tech) => ({
+          id: tech.Log_ID,
+          name: tech.Technician,
+          specialty: tech.Type || "General",
+          availability: tech.Status?.toLowerCase() === "available" || true
+        }));
+        
+        // Only add unique technicians based on name
+        const uniqueTechnicians = Array.from(
+          new Map(formattedTechs.map(tech => [tech.name, tech])).values()
+        );
+        setTechnicians(uniqueTechnicians);
+
+        // Get maintenance schedule
+        const scheduleData = await getMaintenanceSchedule();
+        const calendarEvents = convertScheduleToEvents(scheduleData);
+        setEvents(calendarEvents);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Calculate task counts per day
   const taskCounts: Record<string, number> = events.reduce((counts, event) => {
@@ -91,7 +128,8 @@ export const CalendarProvider = ({ children }: CalendarProviderProps) => {
         updateEvent,
         deleteEvent,
         assignTechnician,
-        isDateOverloaded
+        isDateOverloaded,
+        loading
       }}
     >
       {children}

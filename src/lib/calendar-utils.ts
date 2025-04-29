@@ -1,5 +1,5 @@
 
-import { format, startOfWeek, endOfWeek, addDays, isSameDay } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { MaintenanceTask } from '@/context/CalendarContext';
 
 export const formatDate = (date: Date): string => {
@@ -43,67 +43,4 @@ export const getStatusColor = (status: string): string => {
     default:
       return 'bg-maintenance-gray';
   }
-};
-
-export const getMonthWeeks = (month: Date): Date[][] => {
-  const weeks: Date[][] = [];
-  const start = startOfWeek(month);
-  const end = endOfWeek(month);
-  
-  let currentWeek: Date[] = [];
-  let currentDate = start;
-  
-  while (currentDate <= end) {
-    currentWeek.push(currentDate);
-    if (currentWeek.length === 7) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-    currentDate = addDays(currentDate, 1);
-  }
-  
-  if (currentWeek.length > 0) {
-    weeks.push(currentWeek);
-  }
-  
-  return weeks;
-};
-
-export const generateMockTasks = (): MaintenanceTask[] => {
-  const now = new Date();
-  const tomorrow = addDays(now, 1);
-  const dayAfterTomorrow = addDays(now, 2);
-  
-  return [
-    {
-      id: '1',
-      title: 'HVAC Maintenance',
-      start: new Date(now.setHours(10, 0, 0, 0)),
-      end: new Date(now.setHours(12, 0, 0, 0)),
-      technicianId: '1',
-      description: 'Regular maintenance check for the HVAC system',
-      priority: 'medium',
-      status: 'scheduled'
-    },
-    {
-      id: '2',
-      title: 'Electrical Panel Inspection',
-      start: new Date(tomorrow.setHours(13, 0, 0, 0)),
-      end: new Date(tomorrow.setHours(15, 0, 0, 0)),
-      technicianId: '2',
-      description: 'Annual inspection of all electrical panels',
-      priority: 'high',
-      status: 'scheduled'
-    },
-    {
-      id: '3',
-      title: 'Plumbing System Check',
-      start: new Date(dayAfterTomorrow.setHours(9, 0, 0, 0)),
-      end: new Date(dayAfterTomorrow.setHours(11, 0, 0, 0)),
-      technicianId: null,
-      description: 'Check for leaks and water pressure issues',
-      priority: 'low',
-      status: 'scheduled'
-    }
-  ];
 };

@@ -1,15 +1,35 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCalendar } from "@/context/CalendarContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { getMachines, Machine } from "@/services/supabaseService";
+import { Spinner } from "@/components/ui/spinner";
 
 const Dashboard = () => {
-  const { events, technicians, taskCounts } = useCalendar();
+  const { events, technicians, taskCounts, loading: calendarLoading } = useCalendar();
+  const [machines, setMachines] = useState<Machine[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
+  // Fetch machines data
+  useEffect(() => {
+    const fetchMachines = async () => {
+      try {
+        const machineData = await getMachines();
+        setMachines(machineData);
+      } catch (error) {
+        console.error("Error fetching machines:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMachines();
+  }, []);
+
   const upcomingEvents = events
     .filter(event => new Date(event.start) >= new Date())
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
@@ -35,6 +55,17 @@ const Dashboard = () => {
       transition: { type: "spring", stiffness: 100 }
     }
   };
+
+  if (loading || calendarLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <Spinner className="w-12 h-12 mx-auto mb-4" />
+          <p className="text-lg">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,7 +109,7 @@ const Dashboard = () => {
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Technicians Available</CardTitle>
+              <CardTitle className="text-sm font-medium">Machines</CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -96,10 +127,10 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {technicians.filter(t => t.availability).length}/{technicians.length}
+                {machines.length}
               </div>
               <p className="text-xs text-muted-foreground">
-                {technicians.filter(t => !t.availability).length} unavailable
+                {machines.filter(m => m.Status?.toLowerCase() === "operational").length} operational
               </p>
             </CardContent>
           </Card>

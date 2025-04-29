@@ -38,11 +38,17 @@ const TechnicianSelect = ({ eventId, currentTechnicianId }: TechnicianSelectProp
           <SelectValue placeholder="Assign technician" />
         </SelectTrigger>
         <SelectContent>
-          {technicians.map((tech: Technician) => (
-            <SelectItem key={tech.id} value={tech.id}>
-              {tech.name} - {tech.specialty}
+          {technicians.length > 0 ? (
+            technicians.map((tech: Technician) => (
+              <SelectItem key={tech.id} value={tech.id}>
+                {tech.name} - {tech.specialty}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="no-techs" disabled>
+              No technicians available
             </SelectItem>
-          ))}
+          )}
         </SelectContent>
       </Select>
     </motion.div>
